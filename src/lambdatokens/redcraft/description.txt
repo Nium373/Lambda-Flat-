@@ -1,0 +1,19 @@
+LexerRule:
+  // Test the text and advance text if matched
+  abstract Optional<Token> apply(Text remaining)
+  int length
+  int precedence
+Lexer:
+  List<LexerRule> rules
+  tokenize(Text text):
+    sort rules by LexerRule#length (longest first), then precedence
+    List output;
+
+    while text has remaining:
+      for rule in rules:
+        match = rule.apply(text)
+        if(match is present):
+          output.add(match)
+          break
+
+    return output
