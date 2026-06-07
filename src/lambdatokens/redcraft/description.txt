@@ -17,3 +17,22 @@ Lexer:
           break
 
     return output
+
+Abstract Syntax Tree:
+
+StructuredToken:
+  parent, child, previous, next
+
+  toTree(Set<Type> down, Set<Type> up):
+    list = this;
+    while(list != null):
+      if(down contains list.type):
+        list.child = list.next
+        list.next = null
+        list.child.toTree(down, up)
+        break
+      elif(up contains list.type):
+        list.parent.next = list.next;
+        list.next = null
+      else
+        list = list.next
