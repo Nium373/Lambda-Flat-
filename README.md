@@ -1,7 +1,7 @@
 
 # Lambda Flat (λ♭)
 
-A programming language coded in java for Starbound Alpha. It supports file of the .lf type
+A programming language coded in java for Starbound Alpha. It supports file of the .lambda type
 
 
 
