@@ -1,0 +1,299 @@
+══════════════════════════════════════════════════════════════════════
+                λ♭  Lambda Flat  ·  Syntax Reference
+══════════════════════════════════════════════════════════════════════
+
+  Contents
+  ──────────────────────────────────────────────────────────────────
+   1   Comments              9   String Methods
+   2   Literals & Types     10   Classes
+   3   Variables            11   Built-in Functions
+   4   Functions            12   Logger
+   5   Blocks & Statements  13   Broadcast / Receive  (stubs)
+   6   Control Flow         14   Predefined Constants
+   7   Operators
+   8   Arrays & Maps
+  ──────────────────────────────────────────────────────────────────
+
+
+──────────────────────────────────────────────────────────────────────
+ 1.  COMMENTS
+──────────────────────────────────────────────────────────────────────
+
+  # line comment
+  /* block comment */
+
+
+──────────────────────────────────────────────────────────────────────
+ 2.  LITERALS & TYPES
+──────────────────────────────────────────────────────────────────────
+
+  nil              null / void value
+  true  false      booleans
+  42               integer  (stored as double)
+  3.14             floating-point number
+  "hello"          string  (double-quoted)
+  [1, 2, 3]        array literal
+
+
+──────────────────────────────────────────────────────────────────────
+ 3.  VARIABLES
+──────────────────────────────────────────────────────────────────────
+
+  No declaration keyword is needed — assignment creates or updates.
+
+  F-strings (interpolated strings):
+    f"Hello {name}!"           evaluates {name} and inserts the result
+    f"1 + 2 = {1 + 2}"        any expression is valid inside { }
+    f"nested: {arr.size()}"    method calls work too
+
+  x = 5              create or update a variable
+  public  x = 5      module-level, externally visible
+  private x = 5      module-level, internal only
+
+
+──────────────────────────────────────────────────────────────────────
+ 4.  FUNCTIONS
+──────────────────────────────────────────────────────────────────────
+
+  function add(a, b) {
+      return a + b
+  }
+
+  ·  return expr    — explicit return value
+  ·  return         — returns nil implicitly
+  ·  Functions are first-class values and capture their enclosing scope.
+
+
+──────────────────────────────────────────────────────────────────────
+ 5.  BLOCKS & STATEMENTS
+──────────────────────────────────────────────────────────────────────
+
+  { stmt; stmt }       block — creates a new scope
+  expr                 expression as a statement
+  expr;                semicolons are optional
+
+  Multiple per line:   a = 1; b = 2; c = 3
+  Newline as separator:
+      a = 1
+      b = 2
+
+
+──────────────────────────────────────────────────────────────────────
+ 6.  CONTROL FLOW
+──────────────────────────────────────────────────────────────────────
+
+  if (cond) { ... }
+  if (cond) { ... } else { ... }
+  if (cond) { ... } elif (cond) { ... } else { ... }
+
+  while (cond) { ... }
+  for (init; cond; incr) { ... }
+  for (item in arr) { ... }
+  for (i, item in arr) { ... }
+
+  break       — exit the nearest enclosing loop
+  continue    — skip to the next iteration
+
+  switch (expr) {
+      case value1 { ... }
+      case value2 { ... }
+      default     { ... }
+  }
+
+
+──────────────────────────────────────────────────────────────────────
+ 7.  OPERATORS
+──────────────────────────────────────────────────────────────────────
+
+  Precedence  (lowest → highest):
+
+  Level      Operators              Assoc   Description
+  ─────────  ─────────────────────  ─────   ────────────────────────────
+  assign     =  +=  -=  *=  /=  %=  right   assignment / compound assign
+  or         |                              logical OR   (short-circuits)
+  xor        ||                             logical XOR
+  and        &                              logical AND  (short-circuits)
+  equality   =   !=   ~   !~                equal, not-equal, approx-equal
+  compare    >   >=   <   <=                numeric comparison
+             >>  <<                         order-of-magnitude  (10×)
+             !>  !>=  !<  !<=              negated comparisons
+             !>>  !<<                       negated magnitude
+  member     in   between                   array membership / range check
+  range      ..                             inclusive integer range
+  term       +   -                          addition, subtraction, concat
+  factor     *   /   //   %                 mul, div, int-div, modulo
+  power      **                     right   exponentiation
+  unary      -   not   !                    negate, logical not
+  postfix    ++  --                         post-increment / post-decrement
+  call       f(args)                        function or constructor call
+             obj.method(args)               method call
+             obj[i]                         index access
+             obj.field                      field access  (≡ obj["field"])
+  ─────────  ─────────────────────  ─────   ────────────────────────────
+
+  Operator details:
+
+  =          As a statement:    x = expr       →  assignment
+             In an expression:  expr = expr    →  equality comparison
+
+  ~   !~     Approximate equal — 0.1% relative tolerance for numbers;
+             exact equality for all other types.
+
+  >>  <<     Extreme greater / less  (both operands must be positive):
+               a >> b   true if  a ≥ 10 × b
+               a << b   true if  b ≥ 10 × a
+  !>> !<<    Negations of the above.
+
+  !>  !>=    Not-greater / not-greater-or-equal  (equivalent to <=  and  <)
+  !<  !<=    Not-less  / not-less-or-equal        (equivalent to >=  and  >)
+
+  ||         XOR — true if exactly one operand is truthy.
+
+  in         x in arr      →  true if x equals any element of arr
+  between    x between r   →  true if x is within the bounds of range r
+                               e.g.  5 between 1..10  →  true
+
+  ..         1..5  →  [1, 2, 3, 4, 5]   inclusive; also works in reverse
+
+  //         Integer division, truncated toward zero.
+  **         Exponentiation, right-associative.
+  ++ --      Post-increment / post-decrement; return the old value.
+
+
+──────────────────────────────────────────────────────────────────────
+ 8.  ARRAYS & MAPS
+──────────────────────────────────────────────────────────────────────
+
+  Arrays
+  ──────
+  arr = [1, 2, 3]            array literal
+  arr[i]                     index read   (0-based)
+  arr[i] = value             index write
+
+  arr.push(value)            append to end;           returns value
+  arr.pop()                  remove and return last element
+  arr.shift()                remove and return first element
+  arr.unshift(value)         prepend to front;         returns value
+  arr.insert(idx, value)     insert at index;          returns value
+  arr.remove(idx)            remove and return element at index
+  arr.size()                 number of elements
+  arr.contains(value)        true if value is present
+  arr.indexOf(value)         index of first match, or -1
+  arr.join(sep)              join all elements into a string
+  arr.map(fn)                new array with fn applied to each element
+  arr.filter(fn)             new array of elements where fn returns truthy
+  arr.reduce(fn, initial)    fold elements into a single value
+  arr.forEach(fn)            call fn on each element for side effects
+
+
+  Maps
+  ────
+  m = Map("x", 10, "y", 20)     create a map (key-value pairs; keys must be strings)
+  m.field                        field read   (equivalent to m["field"])
+  m.field = val                  field write  (equivalent to m["field"] = val)
+
+  Values may be any type, including functions.
+
+
+──────────────────────────────────────────────────────────────────────
+ 9.  STRING METHODS
+──────────────────────────────────────────────────────────────────────
+
+  s.length()                number of characters
+  s.upper()                 uppercase copy
+  s.lower()                 lowercase copy
+  s.trim()                  strip leading / trailing whitespace
+  s.contains(sub)           true if sub appears in s
+  s.startsWith(prefix)      true if s begins with prefix
+  s.endsWith(suffix)        true if s ends with suffix
+  s.indexOf(sub)            index of first occurrence, or -1
+  s.replace(old, new)       replace all occurrences of old with new
+  s.substr(start)           substring from start to end of string
+  s.substr(start, end)      substring  [start, end)
+  s.split(delim)            split into an array by delimiter
+
+
+──────────────────────────────────────────────────────────────────────
+ 10. CLASSES
+──────────────────────────────────────────────────────────────────────
+
+  class Animal {
+      function init(name) {
+          self.name = name
+      }
+      function speak() {
+          return self.name + " speaks"
+      }
+  }
+
+  class Dog extends Animal {
+      function init(name, breed) {
+          super.init(name)            # call parent constructor
+          self.breed = breed
+      }
+  }
+
+  dog = Dog("Rex", "Labrador")
+  dog.speak()
+
+  ·  self   refers to the current instance (valid inside methods only)
+  ·  super.method(args)  calls the parent class's version of a method
+  ·  Instances are created by calling the class like a function.
+
+
+──────────────────────────────────────────────────────────────────────
+ 11. BUILT-IN FUNCTIONS
+──────────────────────────────────────────────────────────────────────
+
+  I/O & conversion
+    print(a, b, ...)        print values separated by spaces, then newline
+    read()                  read one line of input; returns a string
+    str(v)                  convert any value to its string representation
+    int(v)                  truncate to integer  (also parses numeric strings)
+    bool(v)                 convert to boolean
+    type(v)                 return the type name as a string
+    min(a, b, ...)          smallest of the arguments  (or min(arr) for arrays)
+    max(a, b, ...)          largest of the arguments   (or max(arr) for arrays)
+    random()                random float in  [0, 1)
+    random(n)               random integer in  [0, n)
+
+  Math
+    abs(n)                  absolute value
+    sqrt(n)                 square root
+    floor(n)                round down
+    ceil(n)                 round up
+    round(n)                round to nearest integer
+    pow(a, b)               a raised to the power b
+    log(val, base)          logarithm of val in the given base
+    sin(n)  cos(n)  tan(n)  trigonometric functions  (radians)
+
+
+──────────────────────────────────────────────────────────────────────
+ 12. LOGGER
+──────────────────────────────────────────────────────────────────────
+
+  logger.info("message")
+  logger.warn("message")
+  logger.error("message")
+
+
+──────────────────────────────────────────────────────────────────────
+ 13. BROADCAST / RECEIVE  (stubs)
+──────────────────────────────────────────────────────────────────────
+
+  broadcast(channel, message, scope)    send a message on a channel
+  receive(channel)                      receive from channel  (returns nil)
+
+  Placeholder stubs for future network / game-agent integration.
+
+
+──────────────────────────────────────────────────────────────────────
+ 14. PREDEFINED CONSTANTS
+──────────────────────────────────────────────────────────────────────
+
+  TRANSMISSION_RANGE    1000           default broadcast range
+  COMPUTER_ID           "computer-0"   identifier for this node
+  NETWORK_ID            "network-0"    identifier for this network
+
+
+══════════════════════════════════════════════════════════════════════

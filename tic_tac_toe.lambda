@@ -1,0 +1,62 @@
+# Tic-Tac-Toe
+board = [[" ", " ", " "], [" ", " ", " "], [" ", " ", " "]]
+player = "X"
+
+function display(b) {
+    for (i = 0; i < 3; i = i + 1) {
+        print(" " + b[i][0] + " | " + b[i][1] + " | " + b[i][2])
+        if (i < 2) {
+            print("---+---+---")
+        }
+    }
+}
+
+function checkWin(b, p) {
+    for (i = 0; i < 3; i = i + 1) {
+        if (b[i][0] = p and b[i][1] = p and b[i][2] = p) { return true }
+        if (b[0][i] = p and b[1][i] = p and b[2][i] = p) { return true }
+    }
+    if (b[0][0] = p and b[1][1] = p and b[2][2] = p) { return true }
+    if (b[0][2] = p and b[1][1] = p and b[2][0] = p) { return true }
+    return false
+}
+
+function isFull(b) {
+    for (i = 0; i < 3; i = i + 1) {
+        for (j = 0; j < 3; j = j + 1) {
+            if (b[i][j] = " ") { return false }
+        }
+    }
+    return true
+}
+
+function getMove(b, p) {
+    print("Player " + p + ", enter row (0-2): ")
+    row = int(read())
+    print("Player " + p + ", enter col (0-2): ")
+    col = int(read())
+    if (row < 0 or row > 2 or col < 0 or col > 2) {
+        print("Invalid position. Try again.")
+        return getMove(b, p)
+    }
+    if (b[row][col] != " ") {
+        print("Cell already taken. Try again.")
+        return getMove(b, p)
+    }
+    b[row][col] = p
+}
+
+display(board)
+while (true) {
+    getMove(board, player)
+    display(board)
+    if (checkWin(board, player)) {
+        print("Player " + player + " wins!")
+        break
+    }
+    if (isFull(board)) {
+        print("It's a draw!")
+        break
+    }
+    if (player = "X") { player = "O" } else { player = "X" }
+}

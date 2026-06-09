@@ -1,0 +1,197 @@
+# Lambda Flat Text Adventure
+
+rooms = []
+rooms.push(["Entrance", "You stand at the entrance of an ancient dungeon. Sunlight streams in from above.", -1, 1, -1, -1, []])
+rooms.push(["Corridor", "A long stone corridor stretches before you. Torches flicker on the walls.", 0, 2, 3, -1, ["rusty key"]])
+rooms.push(["Kitchen", "Dusty pots and pans hang from the ceiling. An old stove sits in the corner.", 1, -1, -1, -1, ["silver spoon"]])
+rooms.push(["Armory", "Weapons and armor line the walls, most rusted beyond use. A gleaming sword catches your eye.", -1, -1, 4, 1, ["magic sword"]])
+rooms.push(["Throne Room", "A massive dragon blocks the throne! Behind it, a golden crown sits on a velvet cushion.", -1, -1, -1, 3, ["golden crown"]])
+
+playerRoom = 0
+inventory = []
+dragonDefeated = false
+
+function itemIndex(arr, name) {
+    for (i = 0; i < arr.size(); i = i + 1) {
+        if (arr[i] = name) { return i }
+    }
+    return -1
+}
+
+function visibleItems(r) {
+    items = r[6]
+    visible = []
+    for (i = 0; i < items.size(); i = i + 1) {
+        val = items[i]
+        if (itemIndex(inventory, val) = -1) {
+            visible.push(val)
+        }
+    }
+    return visible
+}
+
+function describeRoom(r) {
+    print("")
+    print("= " + r[0] + " =")
+    print(r[1])
+
+    exits = ""
+    if (r[2] != -1) { exits = exits + "north " }
+    if (r[3] != -1) { exits = exits + "south " }
+    if (r[4] != -1) { exits = exits + "east " }
+    if (r[5] != -1) { exits = exits + "west " }
+    print("Exits: " + exits)
+
+    vis = visibleItems(r)
+    if (vis.size() > 0) {
+        print("You see: " + str(vis))
+    }
+
+    if (playerRoom = 4 and !dragonDefeated) {
+        print("The dragon glares at you and snarls!")
+    }
+}
+
+function move(dir) {
+    r = rooms[playerRoom]
+    dest = -1
+    if (dir = "north") { dest = r[2] }
+    if (dir = "south") { dest = r[3] }
+    if (dir = "east")  { dest = r[4] }
+    if (dir = "west")  { dest = r[5] }
+    if (dest = -1) {
+        print("You can't go that way.")
+        return
+    }
+    if (dest = 4 and !dragonDefeated) {
+        print("The dragon blocks the entrance to the Throne Room!")
+        print("You'll need to deal with it first.")
+        return
+    }
+    playerRoom = dest
+    describeRoom(rooms[playerRoom])
+}
+
+function take(name) {
+    r = rooms[playerRoom]
+    items = r[6]
+    if (itemIndex(items, name) = -1) {
+        print("There's no " + name + " here.")
+        return
+    }
+    if (itemIndex(inventory, name) != -1) {
+        print("You already have the " + name + ".")
+        return
+    }
+    inventory.push(name)
+    print("Taken: " + name)
+}
+
+function drop(name) {
+    if (itemIndex(inventory, name) = -1) {
+        print("You don't have a " + name + ".")
+        return
+    }
+    newInv = []
+    for (i = 0; i < inventory.size(); i = i + 1) {
+        if (inventory[i] != name) {
+            newInv.push(inventory[i])
+        }
+    }
+    inventory = newInv
+    print("Dropped: " + name)
+}
+
+function useItem(name) {
+    if (itemIndex(inventory, name) = -1) {
+        print("You don't have a " + name + ".")
+        return
+    }
+    if (name = "magic sword") {
+        if (playerRoom = 4 or playerRoom = 3) {
+            if (dragonDefeated) {
+                print("The dragon has already fled.")
+                return
+            }
+            dragonDefeated = true
+            print("You brandish the magic sword! The dragon lets out a roar and flees the dungeon!")
+            print("The path to the Throne Room is now clear.")
+            return
+        }
+        print("There's nothing to fight here.")
+        return
+    }
+    if (name = "rusty key" or name = "silver spoon") {
+        print("Nothing happens.")
+        return
+    }
+    print("You can't use the " + name + ".")
+}
+
+function showInv() {
+    if (inventory.size() = 0) {
+        print("You are empty-handed.")
+        return
+    }
+    print("You carry: " + str(inventory))
+}
+
+function showHelp() {
+    print("Commands:")
+    print("  north, south, east, west  - move between rooms")
+    print("  look                     - describe the current room")
+    print("  inventory, i             - show your inventory")
+    print("  take                     - pick up an item")
+    print("  drop                     - drop an item")
+    print("  use                      - use an item")
+    print("  help                     - show this help")
+    print("  quit                     - exit the game")
+}
+
+function checkWin() {
+    if (itemIndex(inventory, "golden crown") != -1 and playerRoom = 0) {
+        print("")
+        print("You escaped the dungeon with the golden crown!")
+        print("Congratulations! You win!")
+        return true
+    }
+    return false
+}
+
+describeRoom(rooms[playerRoom])
+
+while (true) {
+    print("")
+    cmd = read()
+    if (cmd = nil) { print("Goodbye!"); break }
+
+    if (cmd = "quit") { print("Goodbye!"); break }
+
+    if (cmd = "north" or cmd = "south" or cmd = "east" or cmd = "west") {
+        move(cmd)
+        if (checkWin()) { break }
+        continue
+    }
+
+    if (cmd = "look") { describeRoom(rooms[playerRoom]); continue }
+    if (cmd = "inventory" or cmd = "i") { showInv(); continue }
+    if (cmd = "help") { showHelp(); continue }
+
+    if (cmd = "take") {
+        print("Take what?")
+        take(read())
+        continue
+    }
+    if (cmd = "drop") {
+        print("Drop what?")
+        drop(read())
+        continue
+    }
+    if (cmd = "use") {
+        print("Use what?")
+        useItem(read())
+        continue
+    }
+
+    print("I don't understand '" + cmd + "'. Type 'help' for commands.")
+}

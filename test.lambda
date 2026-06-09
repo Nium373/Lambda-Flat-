@@ -1,0 +1,547 @@
+# Lambda Flat test suite
+
+total = 0;
+passed = 0;
+
+function assert(condition, message) {
+    total = total + 1;
+    if (condition) {
+        passed = passed + 1;
+        print("  PASS: " + message);
+    } else {
+        print("  FAIL: " + message);
+    }
+}
+
+# ==============================
+print("");
+print("== 1. Arithmetic ==");
+
+assert(1 + 2 = 3, "1 + 2 = 3");
+assert(5 - 3 = 2, "5 - 3 = 2");
+assert(4 * 3 = 12, "4 * 3 = 12");
+assert(10 / 2 = 5, "10 / 2 = 5");
+assert(10 % 3 = 1, "10 % 3 = 1");
+assert(1 + 2 * 3 = 7, "precedence: 1 + 2 * 3 = 7");
+assert((1 + 2) * 3 = 9, "parens: (1 + 2) * 3 = 9");
+assert(-5 = -5, "unary minus");
+assert(-(3 + 2) = -5, "unary minus with parens");
+
+# ==============================
+print("");
+print("== 2. Strings ==");
+
+assert("hello" + " world" = "hello world", "string concat");
+assert(str(42) = "42", "str() number");
+assert(str(true) = "true", "str() bool");
+assert(str(nil) = "nil", "str() nil");
+
+# ==============================
+print("");
+print("== 3. Comparisons ==");
+
+assert(5 > 3, "5 > 3");
+assert(3 >= 3, "3 >= 3");
+assert(2 < 5, "2 < 5");
+assert(5 <= 5, "5 <= 5");
+assert(5 = 5, "5 = 5");
+assert(5 != 3, "5 != 3");
+assert("abc" = "abc", "string =");
+assert("abc" != "def", "string !=");
+assert(true != false, "true != false");
+
+# ==============================
+print("");
+print("== 4. Extreme comparisons ==");
+
+assert(100 >> 10, "100 >> 10");
+assert(1000 >> 10, "1000 >> 10");
+assert(10 !>> 10, "10 !>> 10");
+assert(10 << 100, "10 << 100");
+assert(10 !<< 10, "10 !<< 10");
+assert(10 !> 10, "10 !> 10");
+assert(10 !< 10, "10 !< 10");
+
+# ==============================
+print("");
+print("== 5. Boolean / short-circuit ==");
+
+assert(true and true, "true and true");
+assert(!(false and true), "false and true");
+assert(true or false, "true or false");
+assert(!(false or false), "false or false");
+assert(!true = false, "!true");
+assert(not false = true, "not false");
+
+# AND short-circuit: false and X must NOT evaluate X
+side = 0;
+function setSide() {
+    side = 1;
+    return true;
+}
+false and setSide();
+assert(side = 0, "AND short-circuits on false");
+
+# OR short-circuit: true or X must NOT evaluate X
+side = 0;
+true or setSide();
+assert(side = 0, "OR short-circuits on true");
+
+# ==============================
+print("");
+print("== 6. If/else ==");
+
+result = "";
+if (true) {
+    result = "then";
+} else {
+    result = "else";
+}
+assert(result = "then", "if true");
+
+result = "";
+if (false) {
+    result = "then";
+} else {
+    result = "else";
+}
+assert(result = "else", "if false");
+
+result = "";
+if (false) {
+    result = "a";
+} else if (true) {
+    result = "b";
+} else {
+    result = "c";
+}
+assert(result = "b", "else if");
+
+# elif
+result = "";
+if (false) {
+    result = "a";
+} elif (true) {
+    result = "b";
+} else {
+    result = "c";
+}
+assert(result = "b", "elif matches");
+
+result = "";
+if (false) {
+    result = "a";
+} elif (false) {
+    result = "b";
+} elif (true) {
+    result = "c";
+} else {
+    result = "d";
+}
+assert(result = "c", "elif chain third branch");
+
+result = "";
+if (false) {
+    result = "a";
+} elif (false) {
+    result = "b";
+} else {
+    result = "c";
+}
+assert(result = "c", "elif falls through to else");
+
+# ==============================
+print("");
+print("== 7. While loops ==");
+
+i = 0;
+while (i < 3) {
+    i = i + 1;
+}
+assert(i = 3, "while counts");
+
+i = 0;
+while (i < 10) {
+    i = i + 1;
+    if (i = 3) {
+        break;
+    }
+}
+assert(i = 3, "break in while");
+
+i = 0;
+sum = 0;
+while (i < 5) {
+    i = i + 1;
+    if (i = 3) {
+        continue;
+    }
+    sum = sum + i;
+}
+assert(sum = 12, "continue in while skips 3 (1+2+4+5=12)");
+
+# ==============================
+print("");
+print("== 8. For loops ==");
+
+sum = 0;
+for (j = 1; j <= 4; j = j + 1) {
+    sum = sum + j;
+}
+assert(sum = 10, "for loop sums 1..4");
+
+sum = 0;
+for (j = 1; j <= 10; j = j + 1) {
+    if (j = 3) {
+        break;
+    }
+    sum = sum + j;
+}
+assert(sum = 3, "break in for (1+2)");
+
+sum = 0;
+for (j = 1; j <= 5; j = j + 1) {
+    if (j = 3) {
+        continue;
+    }
+    sum = sum + j;
+}
+assert(sum = 12, "continue in for skips 3 (1+2+4+5=12)");
+
+# ==============================
+print("");
+print("== 9. Switch/case ==");
+
+result = "";
+switch (2) {
+    case 1 {
+        result = "one";
+    }
+    case 2 {
+        result = "two";
+    }
+    default {
+        result = "other";
+    }
+}
+assert(result = "two", "switch matches");
+
+result = "";
+switch (99) {
+    case 1 {
+        result = "one";
+    }
+    default {
+        result = "default";
+    }
+}
+assert(result = "default", "switch default");
+
+result = "";
+switch (99) {
+    case 1 {
+        result = "one";
+    }
+    case 2 {
+        result = "two";
+    }
+}
+assert(result = "", "switch no match");
+
+# ==============================
+print("");
+print("== 10. Arrays ==");
+
+arr = [1, 2, 3];
+assert(arr.size() = 3, "arr.size()");
+assert(arr[0] = 1, "index 0");
+assert(arr[2] = 3, "index 2");
+
+arr = [];
+arr.push(10);
+arr.push(20);
+assert(arr.size() = 2, "push size");
+assert(arr[0] = 10, "push value");
+
+v = arr.pop();
+assert(v = 20, "pop value");
+assert(arr.size() = 1, "after pop size");
+
+# ==============================
+print("");
+print("== 12. Functions ==");
+
+function add(a, b) {
+    return a + b;
+}
+assert(add(3, 4) = 7, "add");
+
+function factorial(n) {
+    if (n <= 1) {
+        return 1;
+    }
+    return n * factorial(n - 1);
+}
+assert(factorial(5) = 120, "factorial(5)");
+
+function fib(n) {
+    if (n <= 1) {
+        return n;
+    }
+    return fib(n - 1) + fib(n - 2);
+}
+assert(fib(10) = 55, "fib(10)");
+
+# Closures
+function makeCounter() {
+    count = 0;
+    function increment() {
+        count = count + 1;
+        return count;
+    }
+    return increment;
+}
+counter = makeCounter();
+assert(counter() = 1, "closure 1st call");
+assert(counter() = 2, "closure 2nd call");
+assert(counter() = 3, "closure 3rd call");
+
+# ==============================
+print("");
+print("== 13. Compound assignment ==");
+
+n = 10;
+n += 5;
+assert(n = 15, "n += 5");
+
+n -= 3;
+assert(n = 12, "n -= 3");
+
+n *= 2;
+assert(n = 24, "n *= 2");
+
+n /= 4;
+assert(n = 6, "n /= 4");
+
+n %= 4;
+assert(n = 2, "n %= 4");
+
+s = "hello";
+s += " world";
+assert(s = "hello world", "string +=");
+
+# ==============================
+print("");
+print("== 14. Built-ins ==");
+
+assert(abs(-5) = 5, "abs");
+assert(sqrt(9) = 3, "sqrt");
+assert(floor(3.7) = 3, "floor");
+assert(ceil(3.2) = 4, "ceil");
+assert(round(3.5) = 4, "round");
+assert(pow(2, 3) = 8, "pow");
+assert(int(3.9) = 3, "int");
+assert(bool(1), "bool(1)");
+assert(bool(nil) = false, "bool(nil)");
+
+# ==============================
+print("");
+print("== 15. Logger ==");
+
+logger.info("hello from test");
+logger.warn("this is a warning");
+logger.error("this is an error");
+
+# ==============================
+print("");
+print("== 16. Variables ==");
+
+public x = 5;
+assert(x = 5, "public var");
+
+private y = 10;
+assert(y = 10, "private var");
+
+# ==============================
+print("");
+print("== 17. Edge cases ==");
+
+assert(nil != false, "nil != false");
+assert(nil != 0, "nil != 0");
+assert(!nil, "!nil");
+assert(nil = nil, "nil = nil");
+
+empty = [];
+assert(empty.size() = 0, "empty array");
+
+# ==============================
+print("");
+print("== 18. New operators ==");
+
+assert(2 ** 10 = 1024, "** power");
+assert(2 ** 3 ** 2 = 512, "** right-assoc (2**(3**2) = 2**9 = 512)");
+assert(3 * 2 ** 4 = 48, "** binds tighter than * (3*16=48)");
+
+assert(7 // 3 = 2, "// integer division");
+assert(10 // 4 = 2, "// 10//4=2");
+assert((-7) // 3 = -2, "// negative truncated toward zero");
+
+assert(1..5 = [1, 2, 3, 4, 5], ".. range ascend");
+assert(5..1 = [5, 4, 3, 2, 1], ".. range descend");
+
+i = 0;
+i++;
+assert(i = 1, "++ postfix increment value");
+i = 5;
+result = i++;
+assert(result = 5, "++ postfix returns old value");
+assert(i = 6, "++ postfix updates variable");
+
+i = 10;
+i--;
+assert(i = 9, "-- postfix decrement value");
+i = 5;
+result = i--;
+assert(result = 5, "-- postfix returns old value");
+assert(i = 4, "-- postfix updates variable");
+
+# ==============================
+print("");
+print("== 19. String + number auto-conversion ==");
+
+assert("value: " + 42 = "value: 42", "string + number");
+assert(42 + " is the answer" = "42 is the answer", "number + string");
+assert("1+2=" + (1+2) + "!" = "1+2=3!", "expression in concat");
+assert("" + 0 = "0", "empty string + number");
+assert(0 + "" = "0", "number + empty string");
+
+s = "count: ";
+s += 5;
+assert(s = "count: 5", "string +=");
+t = 5;
+t += " items";
+assert(t = "5 items", "number +=");
+
+# ==============================
+print("");
+print("== 20. Multi-statement lines ==");
+
+a = 1; b = 2; c = 3;
+assert(a = 1 and b = 2 and c = 3, "semicolons on one line");
+
+d = 10 e = 20 f = 30
+assert(d = 10 and e = 20 and f = 30, "no semicolons on one line");
+
+# ==============================
+print("");
+print("== 21. & and | operators ==");
+
+assert(true & true, "& true and true");
+assert(!(true & false), "& true and false");
+assert(!(false & true), "& false and true");
+assert(!(false & false), "& false and false");
+assert(true | true, "| true or true");
+assert(true | false, "| true or false");
+assert(false | true, "| false or true");
+assert(!(false | false), "| false or false");
+
+y = 1;
+if (false & (y=2)) { }
+assert(y = 1, "& short-circuit: y unchanged");
+
+y = 1;
+if (true  | (y=2)) { }
+assert(y = 1, "| short-circuit: y unchanged");
+
+print("");
+print("== 21b. || (XOR) operator ==");
+
+assert(!(true || true), "|| true xor true = false");
+assert(true || false, "|| true xor false = true");
+assert(false || true, "|| false xor true = true");
+assert(!(false || false), "|| false xor false = false");
+assert(true || true || true, "|| associative: 3 trues = true");
+assert(!(false || false || false), "|| associative: 3 falses = false");
+assert(!(5 || 3), "|| numbers: 5 xor 3 -> truthy xor truthy -> false");
+
+print("");
+print("== 22. ~ !~ in between operators ==");
+
+assert(1.0 ~ 1.0, "~ equal numbers");
+assert(0.1 + 0.2 ~ 0.3, "~ float tolerance");
+assert(!(1.0 ~ 2.0), "~ unequal numbers");
+assert(1000000 ~ 1000100, "~ large numbers within 0.1%");
+assert(!(1000000 ~ 1010000), "~ large numbers beyond 0.1%");
+assert("hi" ~ "hi", "~ string equal");
+assert(!("hi" ~ "bye"), "~ string unequal");
+assert(1.0 !~ 2.0, "!~ unequal numbers");
+assert(!(1.0 !~ 1.0), "!~ equal numbers false");
+
+assert(3 in 1..5, "in 3 in 1..5");
+assert(!(6 in 1..5), "in 6 not in 1..5");
+assert(1 in 1..1, "in single element range");
+assert(!(1.5 in 1..5), "in 1.5 not in integer range");
+assert(5 in 5..1, "in descending range");
+
+assert(1.5 between 1..5, "between 1.5 between 1..5");
+assert(1 between 1..5, "between lower bound");
+assert(5 between 1..5, "between upper bound");
+assert(!(0 between 1..5), "between below range");
+assert(!(6 between 1..5), "between above range");
+assert(3 between 5..1, "between descending range");
+
+print("");
+print("== 23. Classes & Objects ==");
+
+class Animal {
+    function init(name) {
+        self.name = name
+    }
+    function speak() {
+        return self.name + " makes a sound"
+    }
+}
+
+class Dog extends Animal {
+    function init(name, breed) {
+        Animal.init(self, name)
+        self.breed = breed
+    }
+    function speak() {
+        return self.name + " barks"
+    }
+    function getBreed() {
+        return self.breed
+    }
+}
+
+a = Animal("Generic")
+assert(a.speak() = "Generic makes a sound", "class method call with self")
+
+d = Dog("Rex", "shepherd")
+assert(d.speak() = "Rex barks", "inherited method override")
+assert(d.getBreed() = "shepherd", "subclass own method")
+assert(d.name = "Rex", "field read via dot")
+assert(d.breed = "shepherd", "inherited field via dot")
+
+class Empty {
+}
+
+e = Empty()
+assert(true, "empty class instantiation")
+
+m = Map("x", 10, "y", 20)
+assert(m.x = 10, "Map() field read")
+assert(m.y = 20, "Map() second field")
+m.x = 99
+assert(m.x = 99, "Map() field write")
+
+# ==============================
+print("");
+print("== Summary ==");
+print("  " + str(passed) + " / " + str(total) + " passed");
+if (passed = total) {
+    print("  ALL TESTS PASSED");
+} else {
+    print("  SOME TESTS FAILED");
+}
